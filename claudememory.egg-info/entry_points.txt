@@ -1,0 +1,5 @@
+[console_scripts]
+claude-memory = claude_memory.cli:main
+claude-memory-index = claude_memory.cli:index_cmd
+claude-memory-serve = claude_memory.cli:serve_cmd
+claude-memory-store = claude_memory.cli:store_cmd

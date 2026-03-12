@@ -1,12 +1,12 @@
 """
-git-memory CLI — entry points for pip-installed commands.
+claude-memory CLI — entry points for pip-installed commands.
 
 Commands:
-    git-memory index    Bulk-index a repository's commit history
-    git-memory serve    Start the MCP server
-    git-memory store    Store a single commit (used by post-commit hook)
-    git-memory install  Install the Claude Code plugin (skills + MCP config)
-    git-memory status   Show index statistics for a repository
+    claude-memory index    Bulk-index a repository's commit history
+    claude-memory serve    Start the MCP server
+    claude-memory store    Store a single commit (used by post-commit hook)
+    claude-memory install  Install the Claude Code plugin (skills + MCP config)
+    claude-memory status   Show index statistics for a repository
 """
 
 import argparse
@@ -25,7 +25,7 @@ PACKAGE_ROOT = Path(__file__).parent.parent
 def index_cmd(argv=None):
     """Bulk-index a Git repository into ChromaDB + Mem0."""
     sys.path.insert(0, str(PACKAGE_ROOT / "scripts"))
-    from git_memory_indexer import main
+    from claude_memory_indexer import main
     main()
 
 
@@ -34,7 +34,7 @@ def index_cmd(argv=None):
 def serve_cmd(argv=None):
     """Start the MCP server (stdio transport for Claude Code)."""
     sys.path.insert(0, str(PACKAGE_ROOT / "ai"))
-    from git_memory_mcp_server import mcp
+    from claude_memory_mcp_server import mcp
     mcp.run()
 
 
@@ -51,9 +51,9 @@ def store_cmd(argv=None):
 
 def status_cmd(argv=None):
     """Show index statistics for a repository."""
-    parser = argparse.ArgumentParser(description="Show git-memory index stats.")
+    parser = argparse.ArgumentParser(description="Show claude-memory index stats.")
     parser.add_argument("--repo-path", default=".", help="Repository path")
-    parser.add_argument("--user-id", default="git_memory_system")
+    parser.add_argument("--user-id", default="claude_memory_system")
     args = parser.parse_args(argv)
 
     sys.path.insert(0, str(PACKAGE_ROOT / "ai"))
@@ -71,7 +71,7 @@ def status_cmd(argv=None):
         total_commits = "?"
         repo_name = args.repo_path
 
-    print(f"\n── git-memory status ─────────────────────────────")
+    print(f"\n── claude-memory status ──────────────────────────")
     print(f"  Repo          : {repo_name}")
     print(f"  Chroma docs   : {count}")
     print(f"  Total commits : {total_commits}")
@@ -89,9 +89,9 @@ def install_cmd(argv=None):
       1. Copy skill files to ~/.claude/skills/
       2. Print MCP server config to add to ~/.claude/claude_desktop_config.json
     """
-    parser = argparse.ArgumentParser(description="Install git-memory Claude Code plugin.")
+    parser = argparse.ArgumentParser(description="Install claude-memory Claude Code plugin.")
     parser.add_argument("--repo-path", default=".", help="Target repo to configure MCP for")
-    parser.add_argument("--user-id", default="git_memory_system")
+    parser.add_argument("--user-id", default="claude_memory_system")
     parser.add_argument("--skills-only", action="store_true")
     parser.add_argument("--mcp-only",    action="store_true")
     args = parser.parse_args(argv)
@@ -119,17 +119,17 @@ def install_cmd(argv=None):
     # ── MCP config ────────────────────────────────────────────────────────────
     if not args.skills_only:
         python_path  = sys.executable
-        server_path  = str(PACKAGE_ROOT / "ai" / "git_memory_mcp_server.py")
+        server_path  = str(PACKAGE_ROOT / "ai" / "claude_memory_mcp_server.py")
         repo_abs     = str(Path(args.repo_path).resolve())
 
         config = {
             "mcpServers": {
-                "git-memory": {
+                "claude-memory": {
                     "command": python_path,
                     "args": [server_path],
                     "env": {
-                        "GIT_MEMORY_REPO_PATH": repo_abs,
-                        "GIT_MEMORY_USER_ID":   args.user_id,
+                        "CLAUDE_MEMORY_REPO_PATH": repo_abs,
+                        "CLAUDE_MEMORY_USER_ID":   args.user_id,
                     }
                 }
             }
@@ -141,7 +141,7 @@ def install_cmd(argv=None):
         if config_path.exists():
             existing = json.loads(config_path.read_text())
             existing.setdefault("mcpServers", {})
-            existing["mcpServers"]["git-memory"] = config["mcpServers"]["git-memory"]
+            existing["mcpServers"]["claude-memory"] = config["mcpServers"]["claude-memory"]
             config_path.write_text(json.dumps(existing, indent=2))
             print(f"✓ Merged into {config_path}")
         else:
@@ -157,7 +157,7 @@ def install_cmd(argv=None):
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="git-memory",
+        prog="claude-memory",
         description="Git Memory System — ChromaDB + Mem0 commit index for Claude Code",
     )
     sub = parser.add_subparsers(dest="command", metavar="COMMAND")
@@ -179,7 +179,7 @@ def main():
     }
 
     if args.command in dispatch:
-        sys.argv = [f"git-memory {args.command}"] + remaining
+        sys.argv = [f"claude-memory {args.command}"] + remaining
         dispatch[args.command]()
     else:
         parser.print_help()

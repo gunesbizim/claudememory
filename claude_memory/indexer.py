@@ -12,16 +12,16 @@ from typing import Optional
 import git
 from mem0 import Memory
 
-from git_memory.filters      import is_relevant, summarize_commit, build_metadata
-from git_memory.chroma_index import ChromaCommitIndex
+from claude_memory.filters      import is_relevant, summarize_commit, build_metadata
+from claude_memory.chroma_index import ChromaCommitIndex
 
 log = logging.getLogger(__name__)
 
 
-class GitMemoryIndexer:
+class ClaudeMemoryIndexer:
     """Indexes relevant commits into ChromaDB (Layer 1) and Mem0 (Layer 2)."""
 
-    def __init__(self, repo_path=".", mem0_config=None, user_id="git_memory_system"):
+    def __init__(self, repo_path=".", mem0_config=None, user_id="claude_memory_system"):
         self.repo      = git.Repo(repo_path, search_parent_directories=True)
         self.repo_name = Path(self.repo.working_dir).name
         self.user_id   = user_id
@@ -34,17 +34,29 @@ class GitMemoryIndexer:
     def _default_mem0_config() -> dict:
         if key := os.getenv("MEM0_API_KEY"):
             return {"api_key": key}
-        return {
-            "vector_store": {
-                "provider": "chroma",
-                "config": {
-                    "collection_name": "git_memory",
-                    "path": str(Path.home() / ".cache" / "git_memory" / "chroma"),
-                },
-            },
-            "embedder": {"provider": "ollama", "config": {"model": "nomic-embed-text"}},
-            "llm":      {"provider": "ollama", "config": {"model": "qwen2.5"}},
+        chroma_path = str(Path.home() / ".cache" / "claude_memory" / "chroma")
+        vector_store = {
+            "provider": "chroma",
+            "config": {"collection_name": "claude_memory", "path": chroma_path},
         }
+        embed_provider = os.getenv("CLAUDE_MEMORY_EMBED_PROVIDER", "ollama")
+        if embed_provider == "openai" or os.getenv("OPENAI_API_KEY"):
+            embedder = {"provider": "openai", "config": {
+                "model": os.getenv("CLAUDE_MEMORY_EMBED_MODEL", "text-embedding-3-small"),
+                "api_key": os.getenv("OPENAI_API_KEY"),
+            }}
+            llm = {"provider": "openai", "config": {
+                "model": os.getenv("CLAUDE_MEMORY_LLM_MODEL", "gpt-4o-mini"),
+                "api_key": os.getenv("OPENAI_API_KEY"),
+            }}
+        else:
+            embedder = {"provider": "ollama", "config": {
+                "model": os.getenv("CLAUDE_MEMORY_EMBED_MODEL", "nomic-embed-text"),
+            }}
+            llm = {"provider": "ollama", "config": {
+                "model": os.getenv("CLAUDE_MEMORY_LLM_MODEL", "qwen2.5"),
+            }}
+        return {"vector_store": vector_store, "embedder": embedder, "llm": llm}
 
     def index_commit(self, commit: git.Commit, force=False) -> bool:
         if not is_relevant(commit.message) and not force:
@@ -123,11 +135,11 @@ def main():
     p.add_argument("--repo-path", default=".")
     p.add_argument("--branch",    default="HEAD")
     p.add_argument("--limit",     type=int, default=None)
-    p.add_argument("--user-id",   default="git_memory_system")
+    p.add_argument("--user-id",   default="claude_memory_system")
     p.add_argument("--dry-run",   action="store_true")
     args = p.parse_args()
 
-    indexer = GitMemoryIndexer(repo_path=args.repo_path, user_id=args.user_id)
+    indexer = ClaudeMemoryIndexer(repo_path=args.repo_path, user_id=args.user_id)
     stats   = indexer.index_all(branch=args.branch, limit=args.limit, dry_run=args.dry_run)
 
     print("\n── Indexing Summary ──────────────────────────")

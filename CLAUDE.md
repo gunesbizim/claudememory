@@ -1,8 +1,8 @@
-<!-- git-memory:start -->
+<!-- claude-memory:start -->
 
-# Git Memory System
+# Claude Memory System
 
-This project provides **git-memory** — a dual-layer semantic index over Git commit history for Claude Code.
+This project provides **claudememory** — a dual-layer semantic index over Git commit history for Claude Code.
 
 Two storage layers work together:
 - **ChromaDB** — 1 document per commit, cosine similarity, metadata filters (fast, authoritative facts)
@@ -10,7 +10,7 @@ Two storage layers work together:
 
 ## Always Start Here
 
-When beginning any task in a repository that has git-memory configured:
+When beginning any task in a repository that has claude-memory configured:
 
 1. Call `latest_commits(5)` to understand what changed recently
 2. Call `search_git_history(<relevant topic>)` before touching any module with history
@@ -20,14 +20,14 @@ When beginning any task in a repository that has git-memory configured:
 
 | Task | Skill |
 |------|-------|
-| Search commit history for a topic | `/git-memory-search` |
-| Index a new repository | `/git-memory-index` |
-| Debug why a component behaves a certain way | `/git-memory-debug` |
-| Check what's currently indexed | `/git-memory-status` |
+| Search commit history for a topic | `/claude-memory-search` |
+| Index a new repository | `/claude-memory-index` |
+| Debug why a component behaves a certain way | `/claude-memory-debug` |
+| Check what's currently indexed | `/claude-memory-status` |
 
 ## MCP Tools Reference
 
-These tools are available when the `git-memory` MCP server is running.
+These tools are available when the `claudememory` MCP server is running.
 
 | Tool | What it gives you | When to use |
 |------|-------------------|-------------|
@@ -77,21 +77,26 @@ If GitNexus is also configured, use both systems together:
 | Question | Use |
 |----------|-----|
 | What does this function call? | GitNexus `context(symbol)` |
-| Why was this function written this way? | git-memory `search_git_history(symbol)` |
+| Why was this function written this way? | claude-memory `search_git_history(symbol)` |
 | What will break if I change this? | GitNexus `impact(symbol)` |
-| Has this area had bugs before? | git-memory `bug_fix_history(component)` |
-| What changed recently? | git-memory `latest_commits(10)` |
+| Has this area had bugs before? | claude-memory `bug_fix_history(component)` |
+| What changed recently? | claude-memory `latest_commits(10)` |
 
 ## Setup for a New Repository
 
 ```bash
 # 1. Index the repo
-git-memory index --repo-path /path/to/repo --user-id my-repo
+claude-memory index --repo-path /path/to/repo --user-id my-repo
 
 # 2. Install Claude Code plugin (skills + MCP config)
-git-memory install --repo-path /path/to/repo --user-id my-repo
+claude-memory install --repo-path /path/to/repo --user-id my-repo
 
 # 3. Restart Claude Code
 ```
 
-<!-- git-memory:end -->
+
+# currentDate
+Today's date is 2026-03-13.
+
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.
+<!-- claude-memory:end -->

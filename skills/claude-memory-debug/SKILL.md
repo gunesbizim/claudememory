@@ -1,9 +1,9 @@
 ---
-name: git-memory-debug
+name: claude-memory-debug
 description: "Use when the user is debugging a regression, investigating unexpected behaviour, or wants to know the full change history of a component. Examples: \"why did this break after the last deploy?\", \"what changed in the auth module recently?\", \"trace all changes to OrderService\""
 ---
 
-# Debug with git-memory
+# Debug with claude-memory
 
 ## When to Use
 
@@ -94,7 +94,7 @@ Run: git show 5e495155 -- app/Services/DiscountService.php
 If GitNexus is configured, combine both tools:
 
 ```
-git-memory: bug_fix_history("payments")
+claude-memory: bug_fix_history("payments")
 → tells you WHAT has broken here before
 
 GitNexus: impact("PaymentService::handleCallback")

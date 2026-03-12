@@ -9,15 +9,36 @@ from pathlib import Path
 from typing import Optional
 
 import chromadb
-from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
 
 log = logging.getLogger(__name__)
 
-CHROMA_DIR  = os.getenv("GIT_MEMORY_CHROMA_DIR",
-                         str(Path.home() / ".cache" / "git_memory" / "chroma_commits"))
-OLLAMA_URL  = os.getenv("OLLAMA_URL", "http://localhost:11434")
-EMBED_MODEL = os.getenv("GIT_MEMORY_EMBED_MODEL", "nomic-embed-text")
-COLLECTION  = "git_commits"
+CHROMA_DIR     = os.getenv("CLAUDE_MEMORY_CHROMA_DIR",
+                            str(Path.home() / ".cache" / "claude_memory" / "chroma_commits"))
+OLLAMA_URL     = os.getenv("OLLAMA_URL", "http://localhost:11434")
+EMBED_MODEL    = os.getenv("CLAUDE_MEMORY_EMBED_MODEL", "nomic-embed-text")
+EMBED_PROVIDER = os.getenv("CLAUDE_MEMORY_EMBED_PROVIDER", "ollama")  # ollama | openai | sentence-transformers
+COLLECTION     = "git_commits"
+
+
+def _build_embedding_function():
+    """Return a ChromaDB embedding function based on CLAUDE_MEMORY_EMBED_PROVIDER."""
+    if EMBED_PROVIDER == "openai":
+        from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+        model = os.getenv("CLAUDE_MEMORY_EMBED_MODEL", "text-embedding-3-small")
+        return OpenAIEmbeddingFunction(
+            api_key=os.environ["OPENAI_API_KEY"],
+            model_name=model,
+        )
+    if EMBED_PROVIDER == "sentence-transformers":
+        from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+        model = os.getenv("CLAUDE_MEMORY_EMBED_MODEL", "all-MiniLM-L6-v2")
+        return SentenceTransformerEmbeddingFunction(model_name=model)
+    # default: ollama
+    from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
+    return OllamaEmbeddingFunction(
+        url=f"{OLLAMA_URL}/api/embeddings",
+        model_name=EMBED_MODEL,
+    )
 
 
 def _build_document(commit_hash, author, date, message, stats, files):
@@ -34,13 +55,10 @@ def _build_document(commit_hash, author, date, message, stats, files):
 class ChromaCommitIndex:
     """1 ChromaDB document per Git commit — fast, accurate, no LLM overhead."""
 
-    def __init__(self, chroma_dir=CHROMA_DIR, ollama_url=OLLAMA_URL, embed_model=EMBED_MODEL):
+    def __init__(self, chroma_dir=CHROMA_DIR):
         Path(chroma_dir).mkdir(parents=True, exist_ok=True)
         self._client = chromadb.PersistentClient(path=chroma_dir)
-        self._ef = OllamaEmbeddingFunction(
-            url=f"{ollama_url}/api/embeddings",
-            model_name=embed_model,
-        )
+        self._ef = _build_embedding_function()
         self._col = self._client.get_or_create_collection(
             name=COLLECTION,
             embedding_function=self._ef,

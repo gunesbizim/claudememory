@@ -1,9 +1,9 @@
 ---
-name: git-memory-search
+name: claude-memory-search
 description: "Use when the user asks about why code was written a certain way, wants to find commits related to a bug, feature or module, or needs historical context before editing. Examples: \"why does the payment module use a state machine?\", \"what commits touched auth?\", \"find all discount-related bug fixes\""
 ---
 
-# Search Git History with git-memory
+# Search Git History with claude-memory
 
 ## When to Use
 

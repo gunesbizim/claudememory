@@ -3,14 +3,14 @@ requires      = ["setuptools>=70", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name        = "git-memory"
-version     = "0.1.0"
+name        = "claudememory"
+version     = "0.1.3"
 description = "Dual-layer ChromaDB + Mem0 Git commit index for Claude Code"
 readme      = "README.md"
 license     = { text = "MIT" }
 requires-python = ">=3.10"
 
-keywords = ["claude-code", "mcp", "git", "memory", "chromadb", "mem0", "ai"]
+keywords = ["claude-code", "mcp", "git", "memory", "chromadb", "mem0", "ai", "claudememory"]
 
 dependencies = [
     "gitpython>=3.1.40",
@@ -21,31 +21,32 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-openai = ["openai>=1.0.0"]
-dev    = ["pytest", "ruff", "mypy"]
+openai               = ["openai>=1.0.0"]
+sentence-transformers = ["sentence-transformers>=2.2.0"]
+dev                  = ["pytest", "ruff", "mypy"]
 
 [project.scripts]
-git-memory       = "git_memory.cli:main"
-git-memory-index = "git_memory.cli:index_cmd"
-git-memory-serve = "git_memory.cli:serve_cmd"
-git-memory-store = "git_memory.cli:store_cmd"
+claude-memory       = "claude_memory.cli:main"
+claude-memory-index = "claude_memory.cli:index_cmd"
+claude-memory-serve = "claude_memory.cli:serve_cmd"
+claude-memory-store = "claude_memory.cli:store_cmd"
 
 [tool.setuptools.packages.find]
-include = ["git_memory*"]
+include = ["claude_memory*"]
 
 [tool.setuptools.package-data]
-"git_memory" = ["py.typed"]
+"claude_memory" = ["py.typed"]
 
 # Ship skills, config, and hook via data_files so they land outside the package
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.data-files]
-"share/git-memory/skills/git-memory-search" = ["skills/git-memory-search/SKILL.md"]
-"share/git-memory/skills/git-memory-index"  = ["skills/git-memory-index/SKILL.md"]
-"share/git-memory/skills/git-memory-status" = ["skills/git-memory-status/SKILL.md"]
-"share/git-memory/skills/git-memory-debug"  = ["skills/git-memory-debug/SKILL.md"]
-"share/git-memory/config"                   = ["config/mcp_config_example.json"]
+"share/claude-memory/skills/claude-memory-search" = ["skills/claude-memory-search/SKILL.md"]
+"share/claude-memory/skills/claude-memory-index"  = ["skills/claude-memory-index/SKILL.md"]
+"share/claude-memory/skills/claude-memory-status" = ["skills/claude-memory-status/SKILL.md"]
+"share/claude-memory/skills/claude-memory-debug"  = ["skills/claude-memory-debug/SKILL.md"]
+"share/claude-memory/config"                      = ["config/mcp_config_example.json"]
 
 [tool.ruff]
 line-length = 100

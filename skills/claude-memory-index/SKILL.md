@@ -1,16 +1,16 @@
 ---
-name: git-memory-index
-description: "Use when the user wants to index a repository into git-memory, start using git-memory on a new project, or re-index after significant history. Examples: \"index the lokumcu repo\", \"set up git memory for this project\", \"re-index everything\""
+name: claude-memory-index
+description: "Use when the user wants to index a repository into claude-memory, start using claude-memory on a new project, or re-index after significant history. Examples: \"index the lokumcu repo\", \"set up claude memory for this project\", \"re-index everything\""
 ---
 
-# Index a Repository with git-memory
+# Index a Repository with claude-memory
 
 ## When to Use
 
-- Starting git-memory on a new repository for the first time
+- Starting claude-memory on a new repository for the first time
 - After a major history rewrite or large batch of commits
 - User explicitly asks to (re-)index a project
-- Setting up git-memory for a team member's repo
+- Setting up claude-memory for a team member's repo
 
 ## Workflow
 
@@ -20,7 +20,7 @@ description: "Use when the user wants to index a repository into git-memory, sta
 3. Ask if the user wants to limit commit count (useful for very large repos)
 4. Run the real index
 5. Show the summary and confirm the post-commit hook is installed
-6. Run git-memory install to register the MCP server
+6. Run claude-memory install to register the MCP server
 ```
 
 ## Checklist
@@ -40,7 +40,7 @@ description: "Use when the user wants to index a repository into git-memory, sta
 ### Dry run (preview what will be indexed)
 ```bash
 source .venv/bin/activate
-python scripts/git_memory_indexer.py \
+python scripts/claude_memory_indexer.py \
   --repo-path /path/to/repo \
   --user-id my-repo-name \
   --dry-run
@@ -48,7 +48,7 @@ python scripts/git_memory_indexer.py \
 
 ### Full index
 ```bash
-python scripts/git_memory_indexer.py \
+python scripts/claude_memory_indexer.py \
   --repo-path /path/to/repo \
   --user-id my-repo-name
 # Add --limit 500 for large repos (indexes 500 newest commits)
@@ -56,7 +56,7 @@ python scripts/git_memory_indexer.py \
 
 ### Install Claude Code plugin
 ```bash
-git-memory install \
+claude-memory install \
   --repo-path /path/to/repo \
   --user-id my-repo-name
 ```
@@ -70,8 +70,8 @@ chmod +x /path/to/repo/.git/hooks/post-commit
 ### Or with pip-installed CLI
 ```bash
 cd /path/to/repo
-git-memory index --repo-path . --user-id my-repo-name
-git-memory install --repo-path . --user-id my-repo-name
+claude-memory index --repo-path . --user-id my-repo-name
+claude-memory install --repo-path . --user-id my-repo-name
 ```
 
 ## Expected Output
