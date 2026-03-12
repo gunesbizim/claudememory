@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: claudememory
-Version: 0.1.3
+Version: 0.1.4
 Summary: Dual-layer ChromaDB + Mem0 Git commit index for Claude Code
 License: MIT
 Keywords: claude-code,mcp,git,memory,chromadb,mem0,ai,claudememory
@@ -22,12 +22,41 @@ Requires-Dist: mypy; extra == "dev"
 
 # claudememory
 
-Dual-layer semantic index over Git commit history for Claude Code.
+[![PyPI version](https://img.shields.io/pypi/v/claudememory)](https://pypi.org/project/claudememory/)
+[![Python](https://img.shields.io/pypi/pyversions/claudememory)](https://pypi.org/project/claudememory/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-| Layer | Purpose |
-|-------|---------|
-| **ChromaDB** | 1 document/commit, cosine similarity, metadata filters — fast, authoritative facts |
-| **Mem0** | LLM-extracted context, cross-session learned interpretation — the *why* layer |
+> Give Claude Code a long-term memory of your Git history.
+
+---
+
+## The problem
+
+Claude Code is great at reading your current codebase — but it has no memory of *why* things were built the way they are.
+
+Every session starts fresh. Ask it why a module was refactored, which bugs have hit the payment service before, or what architectural decision introduced the current state machine — and it has no answer. That context lives in your Git history, but it's inaccessible to the AI.
+
+**claudememory solves this.** It indexes your entire Git commit history into a dual-layer semantic store and exposes it to Claude Code via MCP. Claude can now answer:
+
+- *"Has the auth module had bugs before?"*
+- *"Why was this abstraction introduced?"*
+- *"What changed in PaymentService over the last year?"*
+- *"What commits touched this file?"*
+
+---
+
+## How it works
+
+Two storage layers work together on every indexed commit:
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Facts layer** | ChromaDB | 1 document per commit — cosine similarity search, metadata filters, zero LLM overhead |
+| **Context layer** | Mem0 | LLM-extracted interpretation — the *why* behind each change, cross-session learned context |
+
+ChromaDB acts as the ground truth (fast, accurate, deduplicated). Mem0 enriches results with learned context over time. Claude sees both merged together.
+
+---
 
 ## Install
 
@@ -35,13 +64,17 @@ Dual-layer semantic index over Git commit history for Claude Code.
 pip install claudememory
 ```
 
-No external services required — works out of the box with three embedding options:
+[![PyPI](https://img.shields.io/badge/PyPI-claudememory-blue?logo=pypi)](https://pypi.org/project/claudememory/)
+
+No external services required — three embedding options supported out of the box:
 
 | Mode | Setup | Cost |
 |------|-------|------|
 | **Ollama** (default) | `ollama pull nomic-embed-text` | Free, fully local |
 | **sentence-transformers** | `pip install "claudememory[sentence-transformers]"` | Free, fully local, no Ollama |
 | **OpenAI** | `pip install "claudememory[openai]"` + `OPENAI_API_KEY` | ~$0.0001/commit |
+
+---
 
 ## Quick start
 
@@ -55,25 +88,44 @@ claude-memory install --repo-path /path/to/repo --user-id my-repo
 # 3. Restart Claude Code — then use /claude-memory-search, /claude-memory-debug etc.
 ```
 
-## MCP tools
+After setup, Claude Code automatically has access to your commit history. No prompting required — it calls the tools proactively based on what you're working on.
 
-| Tool | Description |
-|------|-------------|
-| `search_git_history(query)` | Semantic search over commit history |
-| `latest_commits(limit)` | N most-recent indexed commits |
-| `commits_touching_file(filename)` | All commits that modified a file |
-| `bug_fix_history(component)` | Bug/security fixes for a component |
-| `architecture_decisions(topic)` | Refactors, migrations, design decisions |
+---
 
-## CLI
+## MCP tools exposed to Claude
+
+| Tool | What Claude can ask |
+|------|---------------------|
+| `search_git_history(query)` | *"Find commits related to discount logic"* |
+| `latest_commits(limit)` | *"What changed while I was away?"* |
+| `commits_touching_file(filename)` | *"What's the history of PaymentService?"* |
+| `bug_fix_history(component)` | *"Has auth had bugs before?"* |
+| `architecture_decisions(topic)` | *"Why was the state machine introduced?"* |
+
+---
+
+## Claude Code skills
+
+| Skill | Trigger |
+|-------|---------|
+| `/claude-memory-search` | Search commit history for a topic |
+| `/claude-memory-index` | Index a new repository |
+| `/claude-memory-status` | Check what's indexed |
+| `/claude-memory-debug` | Debug a regression with full history |
+
+---
+
+## CLI reference
 
 ```bash
-claude-memory index    --repo-path . --user-id myapp   # bulk index
+claude-memory index    --repo-path . --user-id myapp   # bulk index all commits
 claude-memory serve                                     # start MCP server (stdio)
-claude-memory status   --repo-path .                    # show coverage
-claude-memory install  --repo-path . --user-id myapp   # install plugin
-claude-memory store    HEAD                             # store single commit (hook)
+claude-memory status   --repo-path .                    # show indexed coverage
+claude-memory install  --repo-path . --user-id myapp   # install Claude Code plugin
+claude-memory store    HEAD                             # store single commit (post-commit hook)
 ```
+
+---
 
 ## Configuration
 
@@ -91,7 +143,16 @@ All settings via environment variables:
 | `MEM0_API_KEY` | *(empty)* | Use Mem0 cloud instead of local inference |
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama endpoint |
 
+---
+
 ## Works great alongside [GitNexus](https://github.com/abhigyanpatwari/GitNexus)
 
-- GitNexus answers **what calls what** (structural, live code)
-- claudememory answers **why it was written that way** (historical, commit-level)
+These two tools answer different questions and are better together:
+
+| Question | Tool |
+|----------|------|
+| What does this function call? | GitNexus |
+| Why was this function written this way? | claudememory |
+| What will break if I change this? | GitNexus |
+| Has this area had bugs before? | claudememory |
+| What changed recently? | claudememory |
