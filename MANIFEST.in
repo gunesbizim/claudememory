@@ -1,0 +1,6 @@
+include README.md
+include CLAUDE.md
+include LICENSE
+recursive-include skills *.md
+recursive-include config *.json
+include hooks/post-commit

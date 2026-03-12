@@ -1,0 +1,13 @@
+# Core dependencies for the Git Memory System
+gitpython>=3.1.40
+mem0ai>=0.1.0
+fastmcp>=0.4.0
+
+# Vector store (local mode — no API key required)
+# chromadb>=0.5.0
+
+# Embeddings (local mode — requires Ollama running locally)
+# OR switch to openai embeddings by setting OPENAI_API_KEY and updating mem0 config
+
+# Optional: OpenAI embeddings + LLM (comment out Ollama in config, set this)
+# openai>=1.0.0

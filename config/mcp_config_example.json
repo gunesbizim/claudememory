@@ -1,0 +1,15 @@
+{
+  "_comment": "Add the 'mcpServers' block to your existing ~/.claude/claude_desktop_config.json",
+  "mcpServers": {
+    "git-memory": {
+      "command": "python",
+      "args": ["/ABSOLUTE/PATH/TO/YOUR/REPO/ai/git_memory_mcp_server.py"],
+      "env": {
+        "GIT_MEMORY_REPO_PATH": "/ABSOLUTE/PATH/TO/YOUR/REPO",
+        "GIT_MEMORY_USER_ID": "git_memory_system",
+        "MEM0_API_KEY": "YOUR_MEM0_API_KEY_OR_LEAVE_EMPTY_FOR_LOCAL_CHROMA",
+        "GIT_MEMORY_CHROMA_DIR": "/Users/YOU/.cache/git_memory/chroma"
+      }
+    }
+  }
+}

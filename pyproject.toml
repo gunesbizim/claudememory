@@ -1,0 +1,52 @@
+[build-system]
+requires      = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name        = "git-memory"
+version     = "0.1.0"
+description = "Dual-layer ChromaDB + Mem0 Git commit index for Claude Code"
+readme      = "README.md"
+license     = { text = "MIT" }
+requires-python = ">=3.10"
+
+keywords = ["claude-code", "mcp", "git", "memory", "chromadb", "mem0", "ai"]
+
+dependencies = [
+    "gitpython>=3.1.40",
+    "mem0ai>=0.1.0",
+    "fastmcp>=0.4.0",
+    "chromadb>=1.0.0",
+    "ollama>=0.3.0",
+]
+
+[project.optional-dependencies]
+openai = ["openai>=1.0.0"]
+dev    = ["pytest", "ruff", "mypy"]
+
+[project.scripts]
+git-memory       = "git_memory.cli:main"
+git-memory-index = "git_memory.cli:index_cmd"
+git-memory-serve = "git_memory.cli:serve_cmd"
+git-memory-store = "git_memory.cli:store_cmd"
+
+[tool.setuptools.packages.find]
+include = ["git_memory*"]
+
+[tool.setuptools.package-data]
+"git_memory" = ["py.typed"]
+
+# Ship skills, config, and hook via data_files so they land outside the package
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.data-files]
+"share/git-memory/skills/git-memory-search" = ["skills/git-memory-search/SKILL.md"]
+"share/git-memory/skills/git-memory-index"  = ["skills/git-memory-index/SKILL.md"]
+"share/git-memory/skills/git-memory-status" = ["skills/git-memory-status/SKILL.md"]
+"share/git-memory/skills/git-memory-debug"  = ["skills/git-memory-debug/SKILL.md"]
+"share/git-memory/config"                   = ["config/mcp_config_example.json"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

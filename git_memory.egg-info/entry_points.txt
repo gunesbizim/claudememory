@@ -1,0 +1,5 @@
+[console_scripts]
+git-memory = git_memory.cli:main
+git-memory-index = git_memory.cli:index_cmd
+git-memory-serve = git_memory.cli:serve_cmd
+git-memory-store = git_memory.cli:store_cmd
