@@ -13,7 +13,6 @@ import argparse
 import json
 import os
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
@@ -24,8 +23,7 @@ PACKAGE_ROOT = Path(__file__).parent.parent
 
 def index_cmd(argv=None):
     """Bulk-index a Git repository into ChromaDB + Mem0."""
-    sys.path.insert(0, str(PACKAGE_ROOT / "scripts"))
-    from claude_memory_indexer import main
+    from claude_memory.indexer import main
     main()
 
 
@@ -33,8 +31,7 @@ def index_cmd(argv=None):
 
 def serve_cmd(argv=None):
     """Start the MCP server (stdio transport for Claude Code)."""
-    sys.path.insert(0, str(PACKAGE_ROOT / "ai"))
-    from claude_memory_mcp_server import mcp
+    from claude_memory.mcp_server import mcp
     mcp.run()
 
 
@@ -42,8 +39,7 @@ def serve_cmd(argv=None):
 
 def store_cmd(argv=None):
     """Store a single commit — called by the post-commit hook."""
-    sys.path.insert(0, str(PACKAGE_ROOT / "scripts"))
-    from store_commit_memory import main
+    from claude_memory.store import main
     main()
 
 
@@ -56,8 +52,7 @@ def status_cmd(argv=None):
     parser.add_argument("--user-id", default="claude_memory_system")
     args = parser.parse_args(argv)
 
-    sys.path.insert(0, str(PACKAGE_ROOT / "ai"))
-    from chroma_commit_index import ChromaCommitIndex
+    from claude_memory.chroma_index import ChromaCommitIndex
 
     chroma = ChromaCommitIndex()
     count  = chroma.count()
