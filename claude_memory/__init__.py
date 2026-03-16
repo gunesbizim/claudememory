@@ -11,7 +11,7 @@ Usage:
     claude-memory install   # installs Claude Code plugin
 """
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 __author__  = "Güneş Bizim"
 
 from claude_memory.chroma_index import ChromaCommitIndex

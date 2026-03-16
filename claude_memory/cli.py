@@ -55,7 +55,6 @@ def status_cmd(argv=None):
     from claude_memory.chroma_index import ChromaCommitIndex
 
     chroma = ChromaCommitIndex()
-    count  = chroma.count()
 
     try:
         import git
@@ -64,11 +63,14 @@ def status_cmd(argv=None):
         repo_name = Path(repo.working_dir).name
     except Exception:
         total_commits = "?"
-        repo_name = args.repo_path
+        repo_name = Path(args.repo_path).resolve().name
+
+    count      = chroma.count(repo=repo_name)
+    count_all  = chroma.count()
 
     print(f"\n── claude-memory status ──────────────────────────")
     print(f"  Repo          : {repo_name}")
-    print(f"  Chroma docs   : {count}")
+    print(f"  Chroma docs   : {count} (this repo) / {count_all} (all repos)")
     print(f"  Total commits : {total_commits}")
     if isinstance(total_commits, int) and total_commits > 0:
         pct = round(count / total_commits * 100)
@@ -209,7 +211,7 @@ def install_cmd(argv=None):
     """
     parser = argparse.ArgumentParser(description="Install claude-memory Claude Code plugin.")
     parser.add_argument("--repo-path", default=".", help="Target repo to configure MCP for")
-    parser.add_argument("--user-id", default="claude_memory_system")
+    parser.add_argument("--user-id", default=None, help="Mem0 user ID (defaults to repo name)")
     parser.add_argument("--skills-only", action="store_true")
     parser.add_argument("--mcp-only",    action="store_true")
     parser.add_argument("--no-index",    action="store_true", help="Skip auto-indexing")
@@ -226,6 +228,9 @@ def install_cmd(argv=None):
         print(f"Error: {repo_abs} is not inside a Git repository.")
         print("Run this command from within a Git repository, or pass --repo-path.")
         sys.exit(1)
+
+    repo_name = Path(repo_abs).name
+    user_id   = args.user_id or repo_name
 
     claude_dir   = Path.home() / ".claude"
     skills_dst   = claude_dir / "skills"
@@ -268,7 +273,7 @@ def install_cmd(argv=None):
             "args": mcp_args,
             "env": {
                 "CLAUDE_MEMORY_REPO_PATH": repo_abs,
-                "CLAUDE_MEMORY_USER_ID":   args.user_id,
+                "CLAUDE_MEMORY_USER_ID":   user_id,
             }
         }
 
@@ -290,7 +295,7 @@ def install_cmd(argv=None):
         print(f"✓ Configured MCP server in {project_config_path}")
 
         print(f"\n  Repo path : {repo_abs}")
-        print(f"  User ID   : {args.user_id}")
+        print(f"  User ID   : {user_id}")
 
     # ── CLAUDE.md ──────────────────────────────────────────────────────────────
     print(f"\n── CLAUDE.md ──────────────────────────────────────")
@@ -301,7 +306,7 @@ def install_cmd(argv=None):
         print(f"\n── Indexing repository ─────────────────────────────")
         try:
             from claude_memory.indexer import ClaudeMemoryIndexer
-            indexer = ClaudeMemoryIndexer(repo_path=repo_abs, user_id=args.user_id)
+            indexer = ClaudeMemoryIndexer(repo_path=repo_abs, user_id=user_id)
             stats = indexer.index_all()
             print(f"✓ Indexed {stats['stored']} commits "
                   f"({stats['skipped_duplicate']} duplicates, "

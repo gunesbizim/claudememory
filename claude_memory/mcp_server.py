@@ -52,6 +52,16 @@ CHROMA_DIR = os.getenv(
     str(Path.home() / ".cache" / "claude_memory" / "chroma_commits"),
 )
 
+def _derive_repo_name() -> str:
+    """Derive repo directory name from REPO_PATH, matching the indexer's convention."""
+    try:
+        r = git.Repo(REPO_PATH, search_parent_directories=True)
+        return Path(r.working_dir).name
+    except Exception:
+        return Path(REPO_PATH).resolve().name
+
+REPO_NAME = _derive_repo_name()
+
 # ── Mem0 initialisation ────────────────────────────────────────────────────────
 
 def _build_mem0_config() -> dict:
@@ -209,6 +219,7 @@ def search_git_history(
         query=query,
         n_results=limit,
         category=category,
+        repo=REPO_NAME,
     )
 
     # Layer 2 — Mem0: learned context enrichment
@@ -247,7 +258,7 @@ def latest_commits(limit: int = 10) -> list[dict[str, Any]]:
     limit = min(max(1, limit), 100)
 
     # ChromaDB has reliable date metadata — use it as primary source
-    records = get_chroma().get_latest(n=limit)
+    records = get_chroma().get_latest(n=limit, repo=REPO_NAME)
 
     # Enrich with Mem0 learned context
     mem0_map: dict[str, list[str]] = {}
@@ -332,7 +343,7 @@ def commits_touching_file(filename: str, limit: int = 20) -> list[dict[str, Any]
     # ChromaDB: metadata-exact file search (faster, no LLM needed)
     chroma_map: dict[str, dict] = {
         r["commit_hash"]: r
-        for r in get_chroma().search_by_file(filename, n_results=limit * 2)
+        for r in get_chroma().search_by_file(filename, n_results=limit * 2, repo=REPO_NAME)
     }
 
     # Mem0: learned context enrichment
@@ -400,6 +411,7 @@ def bug_fix_history(
             query=f"{component} {cat}",
             n_results=limit,
             category=cat,
+            repo=REPO_NAME,
         )
 
     # Mem0: learned context for each fix
@@ -444,11 +456,11 @@ def architecture_decisions(topic: str = "", limit: int = 10) -> list[dict[str, A
     # ChromaDB: category-filtered search for arch categories + unfiltered semantic
     chroma_arch = []
     for cat in arch_categories:
-        chroma_arch += get_chroma().search(query=query, n_results=limit, category=cat)
+        chroma_arch += get_chroma().search(query=query, n_results=limit, category=cat, repo=REPO_NAME)
 
     # Also do an unfiltered semantic search — catches 'feat' commits that are
     # architecturally significant but weren't categorised as refactor/migration
-    chroma_broad = get_chroma().search(query=query, n_results=limit)
+    chroma_broad = get_chroma().search(query=query, n_results=limit, repo=REPO_NAME)
     chroma_results = chroma_arch + [r for r in chroma_broad
                                     if r["commit_hash"] not in
                                     {x["commit_hash"] for x in chroma_arch}]

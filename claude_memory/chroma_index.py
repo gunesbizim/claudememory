@@ -132,9 +132,13 @@ class ChromaCommitIndex:
         records.sort(key=lambda r: r.get("date", ""), reverse=True)
         return records[:n]
 
-    def search_by_file(self, filename, n_results=20) -> list[dict]:
+    def search_by_file(self, filename, n_results=20, repo=None) -> list[dict]:
         try:
-            all_docs = self._col.get(include=["metadatas", "documents"])
+            kwargs = dict(include=["metadatas", "documents"])
+            where = self._build_where(repo=repo)
+            if where:
+                kwargs["where"] = where
+            all_docs = self._col.get(**kwargs)
             matched = [
                 {
                     "commit_hash":   all_docs["ids"][i],
@@ -154,10 +158,13 @@ class ChromaCommitIndex:
                 return matched[:n_results]
         except Exception:
             pass
-        return self.search(f"changes to {filename}", n_results=n_results)
+        return self.search(f"changes to {filename}", n_results=n_results, repo=repo)
 
-    def count(self) -> int:
-        return self._col.count()
+    def count(self, repo=None) -> int:
+        if repo is None:
+            return self._col.count()
+        result = self._col.get(where={"repo": {"$eq": repo}}, include=[])
+        return len(result["ids"])
 
     @staticmethod
     def _build_where(category=None, repo=None) -> Optional[dict]:
