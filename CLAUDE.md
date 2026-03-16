@@ -2,15 +2,11 @@
 
 # Claude Memory System
 
-This project provides **claudememory** — a dual-layer semantic index over Git commit history for Claude Code.
-
-Two storage layers work together:
-- **ChromaDB** — 1 document per commit, cosine similarity, metadata filters (fast, authoritative facts)
-- **Mem0** — LLM-extracted context, cross-session learned interpretation (why things were built a certain way)
+This project uses **claudememory** — a dual-layer semantic index over Git commit history for Claude Code.
 
 ## Always Start Here
 
-When beginning any task in a repository that has claude-memory configured:
+When beginning any task in this repository:
 
 1. Call `latest_commits(5)` to understand what changed recently
 2. Call `search_git_history(<relevant topic>)` before touching any module with history
@@ -26,8 +22,6 @@ When beginning any task in a repository that has claude-memory configured:
 | Check what's currently indexed | `/claude-memory-status` |
 
 ## MCP Tools Reference
-
-These tools are available when the `claudememory` MCP server is running.
 
 | Tool | What it gives you | When to use |
 |------|-------------------|-------------|
@@ -70,33 +64,4 @@ Use `category=` in `search_git_history()` to narrow results:
 | `arch`   | Architecture decisions |
 | `perf`   | Performance improvements |
 
-## Integration with GitNexus
-
-If GitNexus is also configured, use both systems together:
-
-| Question | Use |
-|----------|-----|
-| What does this function call? | GitNexus `context(symbol)` |
-| Why was this function written this way? | claude-memory `search_git_history(symbol)` |
-| What will break if I change this? | GitNexus `impact(symbol)` |
-| Has this area had bugs before? | claude-memory `bug_fix_history(component)` |
-| What changed recently? | claude-memory `latest_commits(10)` |
-
-## Setup for a New Repository
-
-```bash
-# 1. Index the repo
-claude-memory index --repo-path /path/to/repo --user-id my-repo
-
-# 2. Install Claude Code plugin (skills + MCP config)
-claude-memory install --repo-path /path/to/repo --user-id my-repo
-
-# 3. Restart Claude Code
-```
-
-
-# currentDate
-Today's date is 2026-03-13.
-
-      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.
 <!-- claude-memory:end -->

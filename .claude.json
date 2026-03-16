@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "claude-memory": {
+      "command": "/Users/gunesbizim/.local/bin/claude-memory",
+      "args": [
+        "serve"
+      ],
+      "env": {
+        "CLAUDE_MEMORY_REPO_PATH": "/Users/gunesbizim/Desktop/projects/claudememory",
+        "CLAUDE_MEMORY_USER_ID": "claude_memory_system"
+      }
+    }
+  }
+}

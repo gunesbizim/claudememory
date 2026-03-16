@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name        = "claudememory"
-version     = "0.1.4"
+version     = "0.1.6"
 description = "Dual-layer ChromaDB + Mem0 Git commit index for Claude Code"
 readme      = "README.md"
 license     = { text = "MIT" }
@@ -35,7 +35,7 @@ claude-memory-store = "claude_memory.cli:store_cmd"
 include = ["claude_memory*"]
 
 [tool.setuptools.package-data]
-"claude_memory" = ["py.typed"]
+"claude_memory" = ["py.typed", "skills/*/SKILL.md"]
 
 # Ship skills, config, and hook via data_files so they land outside the package
 [tool.setuptools]
