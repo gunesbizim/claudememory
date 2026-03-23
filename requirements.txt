@@ -1,4 +1,4 @@
-# Core dependencies for the Git Memory System
+# Core dependencies for Claude Memory System
 gitpython>=3.1.40
 mem0ai>=0.1.0
 fastmcp>=0.4.0

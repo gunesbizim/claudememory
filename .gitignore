@@ -1,0 +1,17 @@
+# Local Claude Code config (contains user-specific absolute paths)
+.claude.json
+
+# GitNexus index
+.gitnexus
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

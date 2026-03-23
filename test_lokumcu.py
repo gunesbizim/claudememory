@@ -4,11 +4,11 @@ Realistic Claude-style queries against the lokumcu memory index.
 Tests both layers (ChromaDB + Mem0) with questions a developer would actually ask.
 """
 import os, sys
-os.environ["GIT_MEMORY_REPO_PATH"] = "../lokumcu"
-os.environ["GIT_MEMORY_USER_ID"]   = "lokumcu"
+os.environ["CLAUDE_MEMORY_REPO_PATH"] = "../lokumcu"
+os.environ["CLAUDE_MEMORY_USER_ID"]   = "lokumcu"
 sys.path.insert(0, "ai")
 
-from git_memory_mcp_server import (
+from claude_memory_mcp_server import (
     search_git_history,
     latest_commits,
     commits_touching_file,

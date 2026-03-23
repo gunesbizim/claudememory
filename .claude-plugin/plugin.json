@@ -1,5 +1,5 @@
 {
-  "name": "git-memory",
+  "name": "claude-memory",
   "description": "Dual-layer ChromaDB + Mem0 Git commit index for Claude Code. Gives Claude semantic memory of your repository's entire change history.",
   "version": "0.1.0",
   "author": {

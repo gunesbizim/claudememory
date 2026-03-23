@@ -5,12 +5,12 @@ Run: source .venv/bin/activate && python test_mcp_tools.py
 """
 
 import os, sys, json
-os.environ["GIT_MEMORY_REPO_PATH"] = "../lokumcu"
-os.environ["GIT_MEMORY_USER_ID"]   = "lokumcu"
+os.environ["CLAUDE_MEMORY_REPO_PATH"] = "../lokumcu"
+os.environ["CLAUDE_MEMORY_USER_ID"]   = "lokumcu"
 
 # Import tools directly from the MCP server module
 sys.path.insert(0, "ai")
-from git_memory_mcp_server import (
+from claude_memory_mcp_server import (
     search_git_history,
     latest_commits,
     commits_touching_file,
