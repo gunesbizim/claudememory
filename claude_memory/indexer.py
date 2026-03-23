@@ -26,7 +26,13 @@ class ClaudeMemoryIndexer:
         self.repo_name = Path(self.repo.working_dir).name
         self.user_id   = user_id
         self.chroma    = ChromaCommitIndex()
-        self.memory    = Memory.from_config(mem0_config or self._default_mem0_config())
+        try:
+            self.memory = Memory.from_config(mem0_config or self._default_mem0_config())
+        except Exception as exc:
+            print(f"⚠ Mem0/Ollama unavailable — Layer 2 (semantic context) disabled: {exc}")
+            print("  To enable it, install and start Ollama: https://ollama.com")
+            print("  Or set OPENAI_API_KEY to use OpenAI embeddings instead.")
+            self.memory = None
         log.info("Repo   : %s  User: %s  Chroma: %d docs",
                  self.repo_name, user_id, self.chroma.count())
 
@@ -87,14 +93,15 @@ class ClaudeMemoryIndexer:
             return False
 
         # Layer 2 — Mem0 (interpretations)
-        try:
-            self.memory.add(
-                messages=[{"role": "user", "content": summary}],
-                user_id=self.user_id,
-                metadata=meta,
-            )
-        except Exception as exc:
-            log.warning("Mem0 failed for %s (Chroma OK): %s", commit.hexsha[:8], exc)
+        if self.memory is not None:
+            try:
+                self.memory.add(
+                    messages=[{"role": "user", "content": summary}],
+                    user_id=self.user_id,
+                    metadata=meta,
+                )
+            except Exception as exc:
+                log.warning("Mem0 failed for %s (Chroma OK): %s", commit.hexsha[:8], exc)
 
         log.info("Stored [%s] %s (%s)",
                  meta["short_hash"], commit.message.splitlines()[0][:72], meta["category"])

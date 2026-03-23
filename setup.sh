@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# setup.sh  —  One-shot setup for the Git Memory System
+# setup.sh  —  One-shot setup for Claude Memory System
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -9,7 +9,7 @@ VENV_DIR="$REPO_ROOT/.venv"
 
 echo ""
 echo "═══════════════════════════════════════════════════════"
-echo "  Git Memory System — Setup"
+echo "  Claude Memory System — Setup"
 echo "═══════════════════════════════════════════════════════"
 echo ""
 
@@ -23,8 +23,8 @@ fi
 
 source "$VENV_DIR/bin/activate"
 echo "▶ Installing dependencies …"
-pip install --quiet --upgrade pip
-pip install --quiet -r "$REPO_ROOT/requirements.txt"
+python3 -m pip install --quiet --upgrade pip
+python3 -m pip install --quiet -r "$REPO_ROOT/requirements.txt"
 
 # ── 2. Git hook ────────────────────────────────────────────────────────────────
 HOOK_PATH="$REPO_ROOT/.git/hooks/post-commit"
@@ -38,9 +38,9 @@ fi
 
 # Inject the venv python path into the hook so it always uses the right env
 PYTHON_PATH="$VENV_DIR/bin/python"
-if ! grep -q "GIT_MEMORY_PYTHON" "$HOOK_PATH"; then
+if ! grep -q "CLAUDE_MEMORY_PYTHON" "$HOOK_PATH"; then
     sed -i.bak "1a\\
-export GIT_MEMORY_PYTHON=\"$PYTHON_PATH\"" "$HOOK_PATH"
+export CLAUDE_MEMORY_PYTHON=\"$PYTHON_PATH\"" "$HOOK_PATH"
     rm -f "$HOOK_PATH.bak"
 fi
 
@@ -58,7 +58,7 @@ if [[ "$ANSWER" =~ ^[Yy]$ ]]; then
 
     echo "  Indexing… (this may take a while for large repos)"
     # shellcheck disable=SC2086
-    "$PYTHON_PATH" "$REPO_ROOT/scripts/git_memory_indexer.py" \
+    "$PYTHON_PATH" "$REPO_ROOT/scripts/claude_memory_indexer.py" \
         --repo-path "$REPO_ROOT" \
         $LIMIT_ARG
 fi
@@ -74,12 +74,12 @@ echo "  Add the following to $CLAUDE_CONFIG:"
 echo ""
 cat <<EOF
   "mcpServers": {
-    "git-memory": {
+    "claude-memory": {
       "command": "$PYTHON_PATH",
-      "args": ["$REPO_ROOT/ai/git_memory_mcp_server.py"],
+      "args": ["$REPO_ROOT/ai/claude_memory_mcp_server.py"],
       "env": {
-        "GIT_MEMORY_REPO_PATH": "$REPO_ROOT",
-        "GIT_MEMORY_USER_ID": "git_memory_system"
+        "CLAUDE_MEMORY_REPO_PATH": "$REPO_ROOT",
+        "CLAUDE_MEMORY_USER_ID": "claude_memory_system"
       }
     }
   }

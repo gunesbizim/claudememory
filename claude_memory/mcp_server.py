@@ -90,10 +90,14 @@ _memory: Optional[Memory] = None
 _chroma: Optional[ChromaCommitIndex] = None
 
 
-def get_memory() -> Memory:
+def get_memory() -> Optional[Memory]:
     global _memory
     if _memory is None:
-        _memory = Memory.from_config(_build_mem0_config())
+        try:
+            _memory = Memory.from_config(_build_mem0_config())
+        except Exception as exc:
+            log.warning("Mem0/Ollama unavailable — Layer 2 disabled: %s", exc)
+            _memory = None  # type: ignore[assignment]
     return _memory
 
 
@@ -224,11 +228,13 @@ def search_git_history(
 
     # Layer 2 — Mem0: learned context enrichment
     mem0_results = []
-    try:
-        raw = get_memory().search(query=query, user_id=USER_ID, limit=limit)
-        mem0_results = _dedupe([_format_result(r) for r in _unwrap(raw)])
-    except Exception as exc:
-        log.warning("Mem0 search failed (Chroma still available): %s", exc)
+    mem = get_memory()
+    if mem is not None:
+        try:
+            raw = mem.search(query=query, user_id=USER_ID, limit=limit)
+            mem0_results = _dedupe([_format_result(r) for r in _unwrap(raw)])
+        except Exception as exc:
+            log.warning("Mem0 search failed (Chroma still available): %s", exc)
 
     results = _merge_results(chroma_results, mem0_results)
     if category:
@@ -262,12 +268,14 @@ def latest_commits(limit: int = 10) -> list[dict[str, Any]]:
 
     # Enrich with Mem0 learned context
     mem0_map: dict[str, list[str]] = {}
-    try:
-        raw = get_memory().get_all(user_id=USER_ID)
-        for r in _dedupe([_format_result(r) for r in _unwrap(raw)]):
-            h = r.get("commit_hash", "")
-            if h:
-                mem0_map.setdefault(h, []).append(r.get("summary", ""))
+    mem = get_memory()
+    if mem is not None:
+        try:
+            raw = mem.get_all(user_id=USER_ID)
+            for r in _dedupe([_format_result(r) for r in _unwrap(raw)]):
+                h = r.get("commit_hash", "")
+                if h:
+                    mem0_map.setdefault(h, []).append(r.get("summary", ""))
     except Exception:
         pass
 
@@ -348,16 +356,18 @@ def commits_touching_file(filename: str, limit: int = 20) -> list[dict[str, Any]
 
     # Mem0: learned context enrichment
     mem0_map: dict[str, list[str]] = {}
-    try:
-        raw = get_memory().search(
-            query=f"changes to {filename}", user_id=USER_ID, limit=50
-        )
-        for r in _dedupe([_format_result(r) for r in _unwrap(raw)]):
-            h = r.get("commit_hash", "")
-            if h:
-                mem0_map.setdefault(h, []).append(r.get("summary", ""))
-    except Exception:
-        pass
+    mem = get_memory()
+    if mem is not None:
+        try:
+            raw = mem.search(
+                query=f"changes to {filename}", user_id=USER_ID, limit=50
+            )
+            for r in _dedupe([_format_result(r) for r in _unwrap(raw)]):
+                h = r.get("commit_hash", "")
+                if h:
+                    mem0_map.setdefault(h, []).append(r.get("summary", ""))
+        except Exception:
+            pass
 
     enriched = []
     for gc in git_commits[:limit]:
@@ -416,12 +426,14 @@ def bug_fix_history(
 
     # Mem0: learned context for each fix
     mem0_results = []
-    try:
-        for q in [f"bug fix {component}", f"security {component}"]:
-            raw = get_memory().search(query=q, user_id=USER_ID, limit=20)
-            mem0_results += [_format_result(r) for r in _unwrap(raw)]
-    except Exception as exc:
-        log.warning("Mem0 bug_fix search failed: %s", exc)
+    mem = get_memory()
+    if mem is not None:
+        try:
+            for q in [f"bug fix {component}", f"security {component}"]:
+                raw = mem.search(query=q, user_id=USER_ID, limit=20)
+                mem0_results += [_format_result(r) for r in _unwrap(raw)]
+        except Exception as exc:
+            log.warning("Mem0 bug_fix search failed: %s", exc)
 
     merged = _merge_results(chroma_results, _dedupe(mem0_results))
 
@@ -467,11 +479,13 @@ def architecture_decisions(topic: str = "", limit: int = 10) -> list[dict[str, A
 
     # Mem0: fallback + learned context
     mem0_results = []
-    try:
-        raw = get_memory().search(query=query, user_id=USER_ID, limit=limit * 2)
-        mem0_results = _dedupe([_format_result(r) for r in _unwrap(raw)])
-    except Exception as exc:
-        log.warning("Mem0 arch search failed: %s", exc)
+    mem = get_memory()
+    if mem is not None:
+        try:
+            raw = mem.search(query=query, user_id=USER_ID, limit=limit * 2)
+            mem0_results = _dedupe([_format_result(r) for r in _unwrap(raw)])
+        except Exception as exc:
+            log.warning("Mem0 arch search failed: %s", exc)
 
     merged = _merge_results(chroma_results, mem0_results)
 
