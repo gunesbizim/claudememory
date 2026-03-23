@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/claudememory)](https://pypi.org/project/claudememory/)
 [![Python](https://img.shields.io/pypi/pyversions/claudememory)](https://pypi.org/project/claudememory/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
 > Give Claude Code a long-term memory of your Git history.
 
@@ -44,11 +44,12 @@ pip install claudememory
 
 [![PyPI](https://img.shields.io/badge/PyPI-claudememory-blue?logo=pypi)](https://pypi.org/project/claudememory/)
 
-No external services required — three embedding options supported out of the box:
+No external services required. Ollama is optional — if it's not running, claudememory falls back to ChromaDB-only mode automatically.
 
 | Mode | Setup | Cost |
 |------|-------|------|
-| **Ollama** (default) | `ollama pull nomic-embed-text` | Free, fully local |
+| **ChromaDB only** (no setup) | Nothing | Free, works immediately |
+| **Ollama** | `ollama pull nomic-embed-text` | Free, fully local, adds semantic layer |
 | **sentence-transformers** | `pip install "claudememory[sentence-transformers]"` | Free, fully local, no Ollama |
 | **OpenAI** | `pip install "claudememory[openai]"` + `OPENAI_API_KEY` | ~$0.0001/commit |
 
@@ -57,11 +58,13 @@ No external services required — three embedding options supported out of the b
 ## Quick start
 
 ```bash
-# 1. Index your repository
-claude-memory index --repo-path /path/to/repo --user-id my-repo
+cd /your/repo
+
+# 1. Index your repository (run from inside the repo)
+claude-memory index
 
 # 2. Install Claude Code skills + MCP config
-claude-memory install --repo-path /path/to/repo --user-id my-repo
+claude-memory install
 
 # 3. Restart Claude Code — then use /claude-memory-search, /claude-memory-debug etc.
 ```
@@ -96,11 +99,15 @@ After setup, Claude Code automatically has access to your commit history. No pro
 ## CLI reference
 
 ```bash
-claude-memory index    --repo-path . --user-id myapp   # bulk index all commits
-claude-memory serve                                     # start MCP server (stdio)
-claude-memory status   --repo-path .                    # show indexed coverage
-claude-memory install  --repo-path . --user-id myapp   # install Claude Code plugin
-claude-memory store    HEAD                             # store single commit (post-commit hook)
+claude-memory index                    # bulk index all commits (run from repo root)
+claude-memory install                  # install Claude Code plugin (run from repo root)
+claude-memory status                   # show indexed coverage
+claude-memory serve                    # start MCP server (stdio)
+claude-memory store HEAD               # store single commit (post-commit hook)
+
+# Optional flags
+claude-memory index --repo-path /other/repo --user-id myapp
+claude-memory status --repo-path /other/repo
 ```
 
 ---
