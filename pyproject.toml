@@ -7,7 +7,7 @@ name        = "claudememory"
 version     = "0.1.8"
 description = "Dual-layer ChromaDB + Mem0 Git commit index for Claude Code"
 readme      = "README.md"
-license     = { text = "MIT" }
+license     = { text = "AGPL-3.0-or-later" }
 requires-python = ">=3.10"
 
 keywords = ["claude-code", "mcp", "git", "memory", "chromadb", "mem0", "ai", "claudememory"]
