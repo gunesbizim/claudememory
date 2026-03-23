@@ -130,6 +130,41 @@ All settings via environment variables:
 
 ---
 
+## Better with conventional commits
+
+claudememory automatically categorizes every commit by scanning its message for keywords. If you already use [Conventional Commits](https://www.conventionalcommits.org/) (`fix:`, `feat:`, `refactor:`, etc.), the tool works out of the box with near-perfect accuracy.
+
+Here's why it matters:
+
+```
+# Without conventional commits
+"updated payment stuff"         → category: general (no signal)
+"fixed the thing"               → category: fix ✓
+
+# With conventional commits
+"fix(payments): race condition" → category: fix ✓
+"feat(auth): add OAuth2 flow"  → category: feat ✓
+"refactor: extract BaseService" → category: refactor ✓
+"perf(queries): add index"     → category: perf ✓
+```
+
+The categorizer maps directly to these prefixes:
+
+| Commit prefix | claudememory category | Queryable via |
+|---------------|----------------------|---------------|
+| `fix:`, `hotfix:`, `patch:` | `fix` | `bug_fix_history()` |
+| `feat:`, `feature:` | `feat` | `search_git_history(category="feat")` |
+| `refactor:` | `refactor` | `architecture_decisions()` |
+| `perf:` | `perf` | `search_git_history(category="perf")` |
+| `security:` | `security` | `bug_fix_history(include_security=True)` |
+| `revert:` | `revert` | `bug_fix_history()` |
+
+Commits without any recognized keyword are still indexed but categorized as `general`. The relevance filter also uses these keywords to decide which commits are worth indexing at all, so well-written conventional commit messages mean higher coverage and better search results.
+
+You don't need conventional commits to use claudememory. But if you adopt them, every tool gets smarter automatically.
+
+---
+
 ## Works great alongside [GitNexus](https://github.com/abhigyanpatwari/GitNexus)
 
 These two tools answer different questions and are better together:
