@@ -276,8 +276,8 @@ def latest_commits(limit: int = 10) -> list[dict[str, Any]]:
                 h = r.get("commit_hash", "")
                 if h:
                     mem0_map.setdefault(h, []).append(r.get("summary", ""))
-    except Exception:
-        pass
+        except Exception:
+            pass
 
     for r in records:
         r["learned_context"] = mem0_map.get(r.get("commit_hash", ""), [])
